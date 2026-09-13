@@ -1,0 +1,25 @@
+{
+  "name": "@nocobase/plugin-tender-radar",
+  "displayName": "Tender radar",
+  "displayName.zh-CN": "招标雷达",
+  "description": "Harvests creative-agency service tenders from public procurement portals and builds a rule-based bid brief for each notice.",
+  "description.zh-CN": "从公共采购门户抓取创意代理服务招标，并为每条公告生成基于规则的投标要点摘要。",
+  "version": "2.0.58",
+  "license": "Apache-2.0",
+  "main": "./dist/server/index.js",
+  "keywords": [
+    "Collaboration"
+  ],
+  "devDependencies": {
+    "axios": "^1.7.0"
+  },
+  "peerDependencies": {
+    "@nocobase/actions": "2.x",
+    "@nocobase/client": "2.x",
+    "@nocobase/database": "2.x",
+    "@nocobase/resourcer": "2.x",
+    "@nocobase/server": "2.x",
+    "@nocobase/test": "2.x",
+    "@nocobase/utils": "2.x"
+  }
+}
