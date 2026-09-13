@@ -1,0 +1,17 @@
+{
+  "uuid": "4f5e6d7c-8b9a-4012-9345-6789abcdef01",
+  "name": "workspace.project.stage_reached",
+  "source": "workspace",
+  "origin": "automation",
+  "depth": 1,
+  "occurredAt": "2026-03-09T16:20:41.000Z",
+  "payload": {
+    "projectUuid": "b8c7d6e5-4f3a-4291-8073-1a2b3c4d5e6f",
+    "dealUuid": "3e7c2b18-9d4a-4c6f-b5e2-1a2b3c4d5e6f",
+    "organisationUuid": "9f8e7d6c-5b4a-4392-8172-0a1b2c3d4e5f",
+    "stage": "design",
+    "previousStage": "concept",
+    "phaseName": "Refinement",
+    "reason": "Identity direction approved by Ada Okonkwo"
+  }
+}

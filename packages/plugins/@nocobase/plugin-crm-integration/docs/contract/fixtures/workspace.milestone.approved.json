@@ -1,0 +1,28 @@
+{
+  "uuid": "7d2e5f18-3a4b-4c5d-9e6f-1a2b3c4d5e6f",
+  "name": "workspace.milestone.approved",
+  "source": "workspace",
+  "origin": "user",
+  "depth": 0,
+  "occurredAt": "2026-03-09T16:20:41.000Z",
+  "payload": {
+    "projectUuid": "b8c7d6e5-4f3a-4291-8073-1a2b3c4d5e6f",
+    "dealUuid": "3e7c2b18-9d4a-4c6f-b5e2-1a2b3c4d5e6f",
+    "organisationUuid": "9f8e7d6c-5b4a-4392-8172-0a1b2c3d4e5f",
+    "milestoneName": "Identity direction",
+    "phaseName": "Direction Selection",
+    "approvalUuid": "e5d4c3b2-a1f0-4e9d-8c7b-6a5b4c3d2e1f",
+    "action": "approve_with_conditions",
+    "approvedByName": "Ada Okonkwo",
+    "approvedAt": "2026-03-09T16:20:41.000Z",
+    "conditionsText": "Warm the secondary palette slightly",
+    "artifactSnapshot": [
+      {
+        "fileUuid": "11111111-2222-4333-8444-555555555555",
+        "name": "Route B lockup",
+        "versionLabel": "v3",
+        "versionHash": "sha256:9c1185a5c5e9fc54612808977ee8f548b2258d31"
+      }
+    ]
+  }
+}

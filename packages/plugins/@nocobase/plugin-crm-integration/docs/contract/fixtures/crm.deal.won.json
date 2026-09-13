@@ -1,0 +1,17 @@
+{
+  "uuid": "c41d8a92-77b6-4a1e-9a3f-2d5c6e7f8a9b",
+  "name": "crm.deal.won",
+  "source": "crm",
+  "origin": "user",
+  "depth": 0,
+  "occurredAt": "2026-02-11T14:02:07.000Z",
+  "payload": {
+    "dealUuid": "3e7c2b18-9d4a-4c6f-b5e2-1a2b3c4d5e6f",
+    "organisationUuid": "9f8e7d6c-5b4a-4392-8172-0a1b2c3d4e5f",
+    "organisationName": "Northwind Studio",
+    "serviceType": "visual_identity",
+    "dealName": "Northwind rebrand",
+    "clientContactName": "Ada Okonkwo",
+    "clientContactEmail": "ada@northwind.example"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@nocobase/plugin-crm-integration",
+  "displayName": "CRM integration & client delivery",
+  "displayName.zh-CN": "CRM 集成与客户交付",
+  "description": "Event bus, identity links and client delivery tracks that connect the Workspace to the CRM",
+  "description.zh-CN": "连接工作区与 CRM 的事件总线、身份映射与客户交付阶段",
+  "version": "2.0.58",
+  "license": "Apache-2.0",
+  "main": "./dist/server/index.js",
+  "keywords": [
+    "Integration"
+  ],
+  "devDependencies": {
+    "react": "^18.2.0"
+  },
+  "peerDependencies": {
+    "@nocobase/actions": "2.x",
+    "@nocobase/client": "2.x",
+    "@nocobase/database": "2.x",
+    "@nocobase/resourcer": "2.x",
+    "@nocobase/server": "2.x",
+    "@nocobase/test": "2.x",
+    "@nocobase/utils": "2.x"
+  }
+}
