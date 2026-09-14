@@ -4,6 +4,9 @@ Harvests creative-agency service tenders from public procurement portals, scores
 well each notice fits agency work, and builds a **bid brief** — the key items to
 consider before committing to a bid.
 
+For the architecture, the design decisions behind it and the rollout plan, see
+[IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md).
+
 Everything is rule-based and deterministic: no LLM, no API key, no hallucinated
 deadlines. A field the extractor cannot establish is reported as a gap rather than
 left silently blank.
