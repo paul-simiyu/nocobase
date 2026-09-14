@@ -12,6 +12,7 @@ export const NAMESPACE = '@nocobase/plugin-tender-radar';
 export const TENDERS_COLLECTION = 'tenders';
 export const TENDER_SOURCES_COLLECTION = 'tenderSources';
 export const HARVEST_RUNS_COLLECTION = 'tenderHarvestRuns';
+export const CRM_TARGETS_COLLECTION = 'crmTargets';
 
 /**
  * Relevance below this score is treated as noise and is not persisted by a harvest.

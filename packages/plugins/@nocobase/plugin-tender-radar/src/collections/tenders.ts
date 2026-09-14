@@ -134,6 +134,36 @@ export default {
         ],
       },
     },
+    /**
+     * CRM linkage. `crmLeadId` is the idempotency guard: a tender that already
+     * carries one is never sent twice unless the caller explicitly resends.
+     */
+    text('crmLeadId', 'CRM lead ID'),
+    datetime('crmSyncedAt', 'Sent to CRM at'),
+    {
+      type: 'string',
+      name: 'crmSyncStatus',
+      interface: 'select',
+      uiSchema: {
+        type: 'string',
+        title: generateNTemplate('CRM status'),
+        'x-component': 'Select',
+        enum: [
+          { label: generateNTemplate('Sent'), value: 'sent', color: 'green' },
+          { label: generateNTemplate('Failed'), value: 'failed', color: 'red' },
+        ],
+      },
+    },
+    {
+      type: 'text',
+      name: 'crmError',
+      interface: 'textarea',
+      uiSchema: {
+        type: 'string',
+        title: generateNTemplate('CRM error'),
+        'x-component': 'Input.TextArea',
+      },
+    },
     /** The full structured brief, so the UI never has to re-derive it. */
     {
       type: 'json',

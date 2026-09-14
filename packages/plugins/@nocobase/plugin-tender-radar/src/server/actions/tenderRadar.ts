@@ -8,8 +8,14 @@
  */
 
 import type { Context, Next } from '@nocobase/actions';
-import { HARVEST_RUNS_COLLECTION, TENDERS_COLLECTION, TENDER_SOURCES_COLLECTION } from '../../constants';
+import {
+  CRM_TARGETS_COLLECTION,
+  HARVEST_RUNS_COLLECTION,
+  TENDERS_COLLECTION,
+  TENDER_SOURCES_COLLECTION,
+} from '../../constants';
 import { briefToMarkdown, isBidBrief } from '../../shared/summary';
+import { CrmSendError, sendTenderToCrm } from '../crm/send';
 import { harvestAll } from '../harvest';
 import { SOURCE_ADAPTERS } from '../sources';
 
@@ -82,5 +88,40 @@ export async function sources(ctx: Context, next: Next) {
     docs: adapter.docs,
     requiredConfig: adapter.requiredConfig ?? [],
   }));
+  await next();
+}
+
+/**
+ * POST /api/tenderRadar:sendToCrm - creates a lead in the configured CRM.
+ *
+ * Idempotent: a tender already carrying a CRM lead id is reported as skipped
+ * rather than duplicated. Pass `resend: true` to send it again deliberately.
+ */
+export async function sendToCrm(ctx: Context, next: Next) {
+  const params = ctx.action.params as Record<string, unknown>;
+  const values = (params.values ?? {}) as Record<string, unknown>;
+  const tenderId = values.tenderId ?? params.tenderId ?? params.filterByTk;
+
+  if (tenderId === undefined || tenderId === null || tenderId === '') {
+    ctx.throw(400, ctx.t('A tenderId is required.'));
+  }
+
+  try {
+    ctx.body = await sendTenderToCrm(
+      {
+        tenders: ctx.db.getRepository(TENDERS_COLLECTION),
+        crmTargets: ctx.db.getRepository(CRM_TARGETS_COLLECTION),
+        variables: ctx.app.environment.getVariables(),
+      },
+      { tenderId: tenderId as string | number, resend: values.resend === true },
+    );
+  } catch (error) {
+    // Caller and configuration problems are 4xx; anything else is a real fault.
+    if (error instanceof CrmSendError) {
+      ctx.throw(error.status, error.message);
+    }
+    throw error;
+  }
+
   await next();
 }

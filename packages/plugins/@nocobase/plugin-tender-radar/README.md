@@ -10,17 +10,18 @@ left silently blank.
 
 ## What you get
 
-Three collections, usable with NocoBase's own table, form, kanban and filter blocks:
+Four collections, usable with NocoBase's own table, form, kanban and filter blocks:
 
 | Collection          | Purpose                                                                               |
 | ------------------- | ------------------------------------------------------------------------------------- |
 | `tenders`           | One row per notice, with extracted bid fields, a relevance score and the stored brief |
 | `tenderSources`     | Which portals to harvest, and their per-source settings                               |
 | `tenderHarvestRuns` | An audit record per source per run: counts, duration, error                           |
+| `crmTargets`        | Where qualified tenders are pushed as CRM leads                                       |
 
 ## In the UI
 
-The collections are driven with NocoBase's own blocks. Two pieces those blocks
+The collections are driven with NocoBase's own blocks. Three pieces those blocks
 cannot express ship with the plugin:
 
 **Bid brief panel** — a field model bound to the `json` interface, but _not_ as the
@@ -29,6 +30,9 @@ details or form block, add the **Bid brief** field and switch its field componen
 _Bid brief_; the stored brief renders as dates, commercials, risks and a checklist
 instead of raw JSON. An empty column, or one holding something that is not a brief,
 degrades to a message rather than an error.
+
+**Send to CRM** — a record-scene button on a tender, covered under
+[Sending a tender to the CRM](#sending-a-tender-to-the-crm).
 
 **Harvest now** — a collection-scene action button. Drop it into the `tenders` table
 toolbar to call `tenderRadar:harvest`, report what was created and updated, then
@@ -127,6 +131,65 @@ A brief pulls together what actually decides a bid:
 That last section matters: it is the difference between "no bid bond is required" and
 "the notice did not say". Only the tender document settles the second.
 
+## Sending a tender to the CRM
+
+A tender that is worth bidding becomes a **lead** in your CRM, on demand — there is
+no auto-push, so a noisy portal day cannot flood the pipeline. Use the **Send to
+CRM** button on a tender record, or call the action directly:
+
+```bash
+curl -X POST '<host>/api/tenderRadar:sendToCrm' -H 'Content-Type: application/json' \
+  -d '{"tenderId": 42}'
+```
+
+The tender keeps `crmLeadId`, `crmSyncedAt`, `crmSyncStatus` and `crmError`, so the
+link and any failure are visible next to the record they concern.
+
+**Sending is idempotent.** A tender already carrying a `crmLeadId` is reported as
+`skipped`, never duplicated — the lead may since have been edited by whoever picked
+it up, and replacing it with a fresh copy would discard that work. Pass
+`{"resend": true}` to override deliberately.
+
+### Configuring a target
+
+Add one row to `crmTargets`:
+
+| Field                       | Purpose                                                    | Default                    |
+| --------------------------- | ---------------------------------------------------------- | -------------------------- |
+| `baseUrl`                   | Root of the CRM                                            | —                          |
+| `leadPath`                  | Path that creates a lead                                   | `/api/nb_crm_leads:create` |
+| `tokenVariable`             | **Name** of the environment variable holding the API token | —                          |
+| `authHeader` / `authScheme` | How the token is sent                                      | `Authorization` / `Bearer` |
+| `idPath`                    | Dot path to the new id in the response                     | `data.id`                  |
+| `fieldMap`                  | Canonical lead key → your CRM's column name                | built-in default           |
+| `defaultValues`             | Sent with every lead (owner, stage, …)                     | `{}`                       |
+
+**The credential is stored by reference, never by value.** `tokenVariable` holds the
+_name_ of an environment variable; the token itself is resolved at request time from
+NocoBase environment variables or `process.env`. A dump of this collection therefore
+carries no secret, and the token never appears in a lead payload.
+
+The defaults target a NocoBase-hosted CRM running the
+[CRM 2.0 solution](https://docs.nocobase.com/solution/crm), whose leads live in
+`nb_crm_leads`. Every one of them is per-target config, so a different CRM needs a
+row rather than a code change.
+
+### What a lead carries
+
+The tender is mapped onto a CRM-neutral lead, then renamed by `fieldMap` on the way
+out — so adding a CRM means adding a mapping, not another builder:
+
+`title`, `organisation` (the buying authority), `country`, `source`, `sourceUrl`,
+`description` (a plain-text summary leading with deadline and value), `brief` (the
+full markdown brief, for a rich-text field), `estimatedValue`, `currency`,
+`expectedCloseDate` (the submission deadline — what the CRM forecasts on),
+`relevanceScore`, `disciplines`, and `externalRef` (the tender's dedupe key, so the
+CRM can de-duplicate independently of this plugin).
+
+Unmapped and empty values are dropped rather than sent as null, so a CRM that rejects
+unknown columns — or overwrites its own defaults with null — is not upset by a field
+this particular tender happened not to have.
+
 ## Relevance scoring
 
 A weighted term list across ten creative disciplines, with title matches weighted five
@@ -150,9 +213,10 @@ audited instead of trusted. Raise or lower the bar per source with `minRelevance
 
 ## Permissions
 
-`tenderRadar:harvest` sits behind the `pm.tender-radar.harvest` ACL snippet, because it
-makes outbound requests. `tenderRadar:brief` and `tenderRadar:sources` are open to any
-signed-in user.
+`tenderRadar:harvest` and `tenderRadar:sendToCrm` sit behind the
+`pm.tender-radar.harvest` ACL snippet, because both make outbound requests — one to
+public portals, one to your CRM with a stored credential. `tenderRadar:brief` and
+`tenderRadar:sources` are open to any signed-in user.
 
 ## Tests
 
@@ -163,9 +227,10 @@ yarn test packages/plugins/@nocobase/plugin-tender-radar
 Covers relevance scoring and its negative cases, date and money parsing, field
 extraction, brief assembly, RSS/Atom parsing, every source normaliser and its
 pagination, the harvest loop's de-duplication, window advancement and failure
-isolation, and on the client side the harvest-response parser plus the badge
-colour and label maps - including that every verdict, urgency band and discipline
-the scorer can emit has a label.
+isolation, the CRM lead mapping and field map, target and credential resolution,
+the send path's idempotency and failure recording, and on the client side the
+harvest and send response parsers plus the badge colour and label maps - including
+that every verdict, urgency band and discipline the scorer can emit has a label.
 
 ## Limitations
 
@@ -177,6 +242,9 @@ the scorer can emit has a label.
   read, so `gaps` will list it.
 - Numeric dates are read day-first, matching the UK, EU and UN portals targeted here.
   A US-format feed added via `rss` needs that checked.
-- The UI is two flow models plus native NocoBase blocks. The brief panel and the
+- The CRM defaults assume a NocoBase-hosted CRM. They were written from the CRM 2.0
+  schema, not verified against a live instance, so confirm the first send and adjust
+  `leadPath` and `fieldMap` if your lead table differs.
+- The UI is three flow models plus native NocoBase blocks. The brief panel and the
   harvest button are type-checked and their pure logic is unit tested, but they have
   not been rendered in a running app - exercise both once after enabling the plugin.

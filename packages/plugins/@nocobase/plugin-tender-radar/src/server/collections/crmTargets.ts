@@ -7,6 +7,6 @@
  * For more information, please refer to: https://www.nocobase.com/agreement.
  */
 
-export { BidBriefFieldModel } from './BidBriefFieldModel';
-export { HarvestTendersActionModel } from './HarvestTendersActionModel';
-export { SendTenderToCrmActionModel } from './SendTenderToCrmActionModel';
+import crmTargets from '../../collections/crmTargets';
+
+export default crmTargets;

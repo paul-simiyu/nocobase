@@ -10,7 +10,7 @@
 import { resolve } from 'node:path';
 import { type InstallOptions, Plugin } from '@nocobase/server';
 import { TENDER_SOURCES_COLLECTION } from '../constants';
-import { brief, harvest, sources } from './actions/tenderRadar';
+import { brief, harvest, sendToCrm, sources } from './actions/tenderRadar';
 import { getAdapter, SELF_CONFIGURING_KEYS } from './sources';
 
 export class PluginTenderRadarServer extends Plugin {
@@ -19,14 +19,15 @@ export class PluginTenderRadarServer extends Plugin {
 
     this.app.resourceManager.define({
       name: 'tenderRadar',
-      actions: { harvest, brief, sources },
+      actions: { harvest, brief, sources, sendToCrm },
     });
 
-    // Harvesting makes outbound requests to public portals, so it stays a
-    // permissioned action rather than something any signed-in user can trigger.
+    // Both of these make outbound requests - one to public portals, one to the
+    // CRM with a stored credential - so they stay permissioned rather than
+    // being something any signed-in user can trigger.
     this.app.acl.registerSnippet({
       name: `pm.${this.name}.harvest`,
-      actions: ['tenderRadar:harvest'],
+      actions: ['tenderRadar:harvest', 'tenderRadar:sendToCrm'],
     });
 
     this.app.acl.allow('tenderRadar', 'brief', 'loggedIn');
