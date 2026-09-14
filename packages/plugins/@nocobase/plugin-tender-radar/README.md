@@ -18,6 +18,24 @@ Three collections, usable with NocoBase's own table, form, kanban and filter blo
 | `tenderSources`     | Which portals to harvest, and their per-source settings                               |
 | `tenderHarvestRuns` | An audit record per source per run: counts, duration, error                           |
 
+## In the UI
+
+The collections are driven with NocoBase's own blocks. Two pieces those blocks
+cannot express ship with the plugin:
+
+**Bid brief panel** — a field model bound to the `json` interface, but _not_ as the
+default, so the generic JSON viewer still handles every other JSON field. On a
+details or form block, add the **Bid brief** field and switch its field component to
+_Bid brief_; the stored brief renders as dates, commercials, risks and a checklist
+instead of raw JSON. An empty column, or one holding something that is not a brief,
+degrades to a message rather than an error.
+
+**Harvest now** — a collection-scene action button. Drop it into the `tenders` table
+toolbar to call `tenderRadar:harvest`, report what was created and updated, then
+refresh the block. A source that fails is reported as a warning, not an error: the
+run still created rows from the sources that worked, and `tenderHarvestRuns` holds
+the detail.
+
 ## Sources
 
 | Key                | Portal                                                                                                                               | Config needed                      |
@@ -144,8 +162,10 @@ yarn test packages/plugins/@nocobase/plugin-tender-radar
 
 Covers relevance scoring and its negative cases, date and money parsing, field
 extraction, brief assembly, RSS/Atom parsing, every source normaliser and its
-pagination, and the harvest loop's de-duplication, window advancement and
-failure isolation.
+pagination, the harvest loop's de-duplication, window advancement and failure
+isolation, and on the client side the harvest-response parser plus the badge
+colour and label maps - including that every verdict, urgency band and discipline
+the scorer can emit has a label.
 
 ## Limitations
 
@@ -157,5 +177,6 @@ failure isolation.
   read, so `gaps` will list it.
 - Numeric dates are read day-first, matching the UK, EU and UN portals targeted here.
   A US-format feed added via `rss` needs that checked.
-- No bespoke UI ships with the plugin; the collections are driven with native NocoBase
-  blocks.
+- The UI is two flow models plus native NocoBase blocks. The brief panel and the
+  harvest button are type-checked and their pure logic is unit tested, but they have
+  not been rendered in a running app - exercise both once after enabling the plugin.

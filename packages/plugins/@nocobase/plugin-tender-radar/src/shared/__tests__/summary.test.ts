@@ -8,7 +8,17 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { briefToMarkdown, buildBidBrief, classifyUrgency, classifyVerdict, formatAmount, formatDate } from '../summary';
+import {
+  briefToMarkdown,
+  buildBidBrief,
+  classifyUrgency,
+  classifyVerdict,
+  formatAmount,
+  formatDate,
+  formatEvaluation,
+  formatRemaining,
+  isBidBrief,
+} from '../summary';
 import type { ExtractedFields, RelevanceResult } from '../types';
 
 const NOW = new Date('2026-03-01T00:00:00.000Z');
@@ -200,5 +210,52 @@ describe('briefToMarkdown', () => {
 
   it('carries the caveat that extraction is rule-based', () => {
     expect(markdown).toContain('extracted by rule');
+  });
+});
+
+describe('formatRemaining', () => {
+  it('distinguishes time left from time passed', () => {
+    expect(formatRemaining(14)).toBe('14 day(s) left');
+    expect(formatRemaining(-3)).toBe('3 day(s) ago');
+    expect(formatRemaining(0)).toBe('0 day(s) left');
+  });
+
+  it('reports an unknown deadline as unknown, never as zero', () => {
+    expect(formatRemaining(undefined)).toBe('unknown');
+  });
+});
+
+describe('formatEvaluation', () => {
+  it('renders the split and the pass mark', () => {
+    expect(formatEvaluation({ technicalWeight: 70, financialWeight: 30, technicalThreshold: 75 })).toBe(
+      '70% technical / 30% financial, pass mark 75%',
+    );
+  });
+
+  it('omits a pass mark that was not stated', () => {
+    expect(formatEvaluation({ technicalWeight: 80, financialWeight: 20 })).toBe('80% technical / 20% financial');
+  });
+
+  it('marks an unknown half rather than inventing it', () => {
+    expect(formatEvaluation({ technicalWeight: 70 })).toBe('70% technical / ?% financial');
+    expect(formatEvaluation(undefined)).toBe('not stated');
+  });
+});
+
+describe('isBidBrief', () => {
+  it('accepts a brief the builder produced', () => {
+    expect(isBidBrief(brief({ deadlineAt: '2026-04-01T00:00:00.000Z' }))).toBe(true);
+  });
+
+  it('rejects anything missing a required section', () => {
+    const partial = { headline: {}, timeline: {}, commercials: {}, fit: {}, requirements: {} };
+
+    expect(isBidBrief(partial)).toBe(false);
+  });
+
+  it('rejects primitives, null and arrays', () => {
+    for (const value of [null, undefined, 'brief', 42, []]) {
+      expect(isBidBrief(value)).toBe(false);
+    }
   });
 });

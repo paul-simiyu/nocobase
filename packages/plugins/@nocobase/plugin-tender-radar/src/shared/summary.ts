@@ -242,27 +242,43 @@ export function buildBidBrief(input: BriefInput): BidBrief {
   };
 }
 
+/**
+ * Narrows a stored brief read back from the `bidBrief` JSON column.
+ *
+ * The column is typed `unknown` on the way out, so both the HTTP action and the
+ * UI check the shape before rendering; a hand-edited or pre-upgrade row then
+ * degrades to a message instead of crashing.
+ */
+export function isBidBrief(value: unknown): value is BidBrief {
+  if (typeof value !== 'object' || value === null) return false;
+  const record = value as Record<string, unknown>;
+  return ['headline', 'timeline', 'commercials', 'fit', 'requirements', 'submission'].every(
+    (key) => typeof record[key] === 'object' && record[key] !== null,
+  );
+}
+
+/** "14 day(s) left", "3 day(s) ago", or "unknown" when no deadline was found. */
+export function formatRemaining(daysRemaining?: number): string {
+  if (daysRemaining === undefined) return 'unknown';
+  if (daysRemaining < 0) return `${Math.abs(daysRemaining)} day(s) ago`;
+  return `${daysRemaining} day(s) left`;
+}
+
+/** "70% technical / 30% financial, pass mark 75%" */
+export function formatEvaluation(evaluation?: ExtractedFields['evaluation']): string {
+  if (!evaluation) return 'not stated';
+  const split = `${evaluation.technicalWeight ?? '?'}% technical / ${evaluation.financialWeight ?? '?'}% financial`;
+  return evaluation.technicalThreshold !== undefined ? `${split}, pass mark ${evaluation.technicalThreshold}%` : split;
+}
+
 const bullet = (items: string[], empty: string): string =>
   items.length ? items.map((item) => `- ${item}`).join('\n') : `- ${empty}`;
 
 /** Renders a brief as markdown, for email, chat or a workflow notification body. */
 export function briefToMarkdown(brief: BidBrief): string {
   const { headline, timeline, commercials, fit, requirements, submission } = brief;
-  const remaining =
-    timeline.daysRemaining === undefined
-      ? 'unknown'
-      : timeline.daysRemaining < 0
-        ? `${Math.abs(timeline.daysRemaining)} day(s) ago`
-        : `${timeline.daysRemaining} day(s) left`;
-
-  const evaluation = requirements.evaluation
-    ? `${requirements.evaluation.technicalWeight ?? '?'}% technical / ${
-        requirements.evaluation.financialWeight ?? '?'
-      }% financial` +
-      (requirements.evaluation.technicalThreshold !== undefined
-        ? `, pass mark ${requirements.evaluation.technicalThreshold}%`
-        : '')
-    : 'not stated';
+  const remaining = formatRemaining(timeline.daysRemaining);
+  const evaluation = formatEvaluation(requirements.evaluation);
 
   return [
     `# ${headline.title}`,

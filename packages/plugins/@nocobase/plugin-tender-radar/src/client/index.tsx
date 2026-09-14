@@ -8,15 +8,17 @@
  */
 
 import { Plugin } from '@nocobase/client';
+import * as models from './models';
 
 /**
- * Tender radar ships no bespoke UI: `tenders`, `tenderSources` and
- * `tenderHarvestRuns` are ordinary collections, so tables, forms, filters and
- * kanban views are built with NocoBase's own blocks against them. This entry
- * exists to register the plugin's i18n namespace on the client.
+ * The `tenders`, `tenderSources` and `tenderHarvestRuns` collections are driven
+ * with NocoBase's own blocks. This plugin adds only the two pieces those blocks
+ * cannot express: a reader for the stored bid brief, and a button to harvest.
  */
 export class PluginTenderRadarClient extends Plugin {
-  async load() {}
+  async load() {
+    this.app.flowEngine.registerModels(models);
+  }
 }
 
 export default PluginTenderRadarClient;

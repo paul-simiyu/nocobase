@@ -9,8 +9,7 @@
 
 import type { Context, Next } from '@nocobase/actions';
 import { HARVEST_RUNS_COLLECTION, TENDERS_COLLECTION, TENDER_SOURCES_COLLECTION } from '../../constants';
-import { briefToMarkdown } from '../../shared/summary';
-import type { BidBrief } from '../../shared/types';
+import { briefToMarkdown, isBidBrief } from '../../shared/summary';
 import { harvestAll } from '../harvest';
 import { SOURCE_ADAPTERS } from '../sources';
 
@@ -18,18 +17,6 @@ const readStringArray = (value: unknown): string[] | undefined => {
   if (!Array.isArray(value)) return undefined;
   const items = value.filter((item): item is string => typeof item === 'string');
   return items.length ? items : undefined;
-};
-
-/**
- * A stored brief is a JSON column, so it arrives as `unknown`. Checking the shape
- * keeps a hand-edited or pre-upgrade row from crashing the renderer.
- */
-const isBidBrief = (value: unknown): value is BidBrief => {
-  if (typeof value !== 'object' || value === null) return false;
-  const record = value as Record<string, unknown>;
-  return ['headline', 'timeline', 'commercials', 'fit', 'requirements', 'submission'].every(
-    (key) => typeof record[key] === 'object' && record[key] !== null,
-  );
 };
 
 /** POST /api/tenderRadar:harvest - runs every enabled source, or the ones named. */
