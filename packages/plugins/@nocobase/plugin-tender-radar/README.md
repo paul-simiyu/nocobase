@@ -5,7 +5,10 @@ well each notice fits agency work, and builds a **bid brief** — the key items 
 consider before committing to a bid.
 
 For the architecture, the design decisions behind it and the rollout plan, see
-[IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md).
+[IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md), also published as a
+[shareable page](https://claude.ai/artifact/8hzE1HGyudrmY2RoVw8ppW) for readers who
+are not working in the branch. The markdown is the source of truth; the page is a
+rendering of it.
 
 Everything is rule-based and deterministic: no LLM, no API key, no hallucinated
 deadlines. A field the extractor cannot establish is reported as a gap rather than
