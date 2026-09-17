@@ -242,6 +242,9 @@ to public portals, one to your CRM with a stored credential.
 
 ## 6. Configuration
 
+**Host.** The platform is served at `https://www.proj.simpauldesign.com`, which is
+also the contact URL the harvester sends to portals in its `User-Agent`.
+
 **Sources.** Installing seeds the four adapters needing no credentials, enabled.
 `reliefweb` needs an `appname`; `rss` needs a feed `url`.
 
@@ -290,6 +293,13 @@ using the same stub. **Run the real suite once on a working install.**
 note it states NocoBase ≥ 2.1.0-beta.2 with PostgreSQL 16 and `DB_UNDERSCORED` not
 `true`; this repo is on 2.0.58.
 
+Resolve the two host prerequisites before anything is deployed, since both fail late
+and read as unrelated faults: `www.proj.simpauldesign.com` currently has **no A
+record** (`proj.simpauldesign.com` resolves, to the same address as
+`crm.simpauldesign.com`), and a wildcard certificate for `*.simpauldesign.com` does
+**not** cover a four-label host — that needs `*.proj.simpauldesign.com` or an explicit
+entry on the certificate.
+
 **Phase 1 — enable.** `yarn pm add` + `yarn pm enable`, then `yarn nocobase upgrade`.
 Confirm the four collections and the unique index on `dedupeKey`. Run `yarn test` and
 `yarn eslint --fix` on the package.
@@ -316,14 +326,15 @@ adjust `minRelevance` per source. Add discipline terms the scorer missed.
 
 ## 9. Risks and open questions
 
-| Risk                                              | Impact                             | Mitigation                                                   |
-| ------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------ |
-| Adapter contracts unverified against live portals | A source returns nothing or errors | Per-source run log; overridable endpoints; verify in Phase 2 |
-| CRM endpoint and schema assumed                   | First send rejected                | Every field is config; send one tender first                 |
-| No live UI render                                 | A model fails to mount             | Type-checked against real antd types; verify in Phase 3      |
-| Day-first date parsing                            | A US-format feed misreads dates    | Documented; check any `rss` source added from a US publisher |
-| Detail only inside an attached PDF                | Requirement missed                 | Reported in `gaps`, never silently blank                     |
-| Portal rate limits unknown                        | Throttling on large backfills      | Per-source `limit`; start with a short `lookbackDays`        |
+| Risk                                              | Impact                                                    | Mitigation                                                                        |
+| ------------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Adapter contracts unverified against live portals | A source returns nothing or errors                        | Per-source run log; overridable endpoints; verify in Phase 2                      |
+| CRM endpoint and schema assumed                   | First send rejected                                       | Every field is config; send one tender first                                      |
+| No live UI render                                 | A model fails to mount                                    | Type-checked against real antd types; verify in Phase 3                           |
+| Day-first date parsing                            | A US-format feed misreads dates                           | Documented; check any `rss` source added from a US publisher                      |
+| Detail only inside an attached PDF                | Requirement missed                                        | Reported in `gaps`, never silently blank                                          |
+| Portal rate limits unknown                        | Throttling on large backfills                             | Per-source `limit`; start with a short `lookbackDays`                             |
+| Platform host not yet resolving or certified      | Deploy serves nothing, or browsers reject the certificate | Add the `www` A record and a certificate covering the four-label host, in Phase 0 |
 
 **Open question.** What software runs `crm.simpauldesign.com`? The defaults assume a
 NocoBase-hosted CRM 2.0. If it is something else, the field map and `leadPath` handle

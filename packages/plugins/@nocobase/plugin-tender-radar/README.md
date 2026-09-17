@@ -84,6 +84,36 @@ Installing seeds the four sources that need no credentials, enabled and ready.
 Collections and indexes are created by `yarn nocobase upgrade`, so no migration ships
 with this plugin.
 
+## Deployment
+
+The platform is served at **`https://www.proj.simpauldesign.com`**. That host is also
+the contact URL the harvester sends to portals in its `User-Agent`, so portal
+operators reading their logs can identify who is calling — change
+`USER_AGENT` in `src/server/sources/http.ts` if you run this plugin elsewhere.
+
+Relevant NocoBase settings for that deployment:
+
+| Variable        | Value        | Note                                                      |
+| --------------- | ------------ | --------------------------------------------------------- |
+| `APP_ENV`       | `production` | In production NocoBase does not serve static files itself |
+| `APP_PORT`      | `13000`      | The port nginx proxies to                                 |
+| `APP_KEY`       | _(secret)_   | Must be set, and must not be the example value            |
+| `API_BASE_PATH` | `/api/`      | Prefix every action in this README assumes                |
+| `API_BASE_URL`  | empty        | Leave empty when the API is served from the same host     |
+
+Put nginx in front to terminate TLS and serve static files; NocoBase ships a
+[reference config](https://github.com/nocobase/nocobase/blob/main/docker/nocobase/nocobase.conf).
+
+Two prerequisites are worth checking before the first deploy, because both fail late
+and confusingly:
+
+- **DNS.** At the time of writing `www.proj.simpauldesign.com` has no A record, while
+  `proj.simpauldesign.com` resolves. Add the `www` record, or drop the `www` and use
+  the shorter host consistently.
+- **TLS.** A wildcard certificate for `*.simpauldesign.com` does **not** cover
+  `www.proj.simpauldesign.com` — a wildcard matches one label only. That host needs
+  either `*.proj.simpauldesign.com` or its own explicit entry on the certificate.
+
 ## Harvesting
 
 ```bash

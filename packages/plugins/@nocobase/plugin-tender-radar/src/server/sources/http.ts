@@ -13,9 +13,12 @@ const DEFAULT_TIMEOUT = 30_000;
 
 /**
  * Identifies the harvester to portal operators. Several procurement APIs ask
- * re-users to send a contactable agent string rather than a browser one.
+ * re-users to send a contactable agent string rather than a browser one, so
+ * this points at the deployment rather than at the framework. Change it if you
+ * run this plugin somewhere else - claiming another operator's host is rude to
+ * the portals and useless to whoever reads their logs.
  */
-const USER_AGENT = 'NocoBase-TenderRadar/1.0 (+https://www.nocobase.com)';
+const USER_AGENT = 'TenderRadar/1.0 (+https://www.proj.simpauldesign.com)';
 
 export interface RequestOptions {
   params?: Record<string, string | number | undefined>;
