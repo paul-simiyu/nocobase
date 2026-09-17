@@ -101,8 +101,9 @@ Relevant NocoBase settings for that deployment:
 | `API_BASE_PATH` | `/api/`      | Prefix every action in this README assumes                |
 | `API_BASE_URL`  | empty        | Leave empty when the API is served from the same host     |
 
-Put nginx in front to terminate TLS and serve static files; NocoBase ships a
-[reference config](https://github.com/nocobase/nocobase/blob/main/docker/nocobase/nocobase.conf).
+Ready-to-use compose, environment and nginx config for that host live in
+[`deploy/proj.simpauldesign.com/`](../../../../deploy/proj.simpauldesign.com), along
+with the first-deploy steps.
 
 `proj.simpauldesign.com` already resolves, to the same address as
 `crm.simpauldesign.com`, and a wildcard certificate for `*.simpauldesign.com` covers it

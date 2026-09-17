@@ -1,0 +1,51 @@
+# Deployment: proj.simpauldesign.com
+#
+# Brings up the NocoBase app (carrying plugin-tender-radar) plus its database.
+# nginx terminates TLS on the host and proxies to the app; see nginx/.
+
+networks:
+  nocobase:
+    driver: bridge
+
+services:
+  app:
+    image: nocobase/nocobase:latest
+    restart: unless-stopped
+    networks:
+      - nocobase
+    env_file:
+      - .env
+    ports:
+      # Bound to loopback deliberately. The stock NocoBase compose publishes
+      # "13000:80", which listens on every interface and leaves the app
+      # reachable on http://<public-ip>:13000, bypassing TLS and nginx. Only
+      # nginx on this host needs to reach it.
+      - '127.0.0.1:${APP_PORT:-13000}:80'
+    volumes:
+      - ./storage:/app/nocobase/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+    init: true
+
+  postgres:
+    # 16 rather than the 10 in the upstream example: it is a supported release,
+    # and it is what the CRM 2.0 solution expects should that ever share a host.
+    image: postgres:16
+    restart: unless-stopped
+    command: postgres -c wal_level=logical
+    networks:
+      - nocobase
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-nocobase}
+      POSTGRES_USER: ${DB_USER:-nocobase}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+    volumes:
+      - ./storage/db/postgres:/var/lib/postgresql/data
+    healthcheck:
+      # Lets the app wait for a database that accepts connections, rather than
+      # crash-looping against one that is still initialising.
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-nocobase} -d ${DB_DATABASE:-nocobase}']
+      interval: 10s
+      timeout: 5s
+      retries: 10
