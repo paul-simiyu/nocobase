@@ -18,7 +18,7 @@ const DEFAULT_TIMEOUT = 30_000;
  * run this plugin somewhere else - claiming another operator's host is rude to
  * the portals and useless to whoever reads their logs.
  */
-const USER_AGENT = 'TenderRadar/1.0 (+https://www.proj.simpauldesign.com)';
+const USER_AGENT = 'TenderRadar/1.0 (+https://proj.simpauldesign.com)';
 
 export interface RequestOptions {
   params?: Record<string, string | number | undefined>;

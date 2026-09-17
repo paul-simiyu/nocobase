@@ -86,7 +86,7 @@ with this plugin.
 
 ## Deployment
 
-The platform is served at **`https://www.proj.simpauldesign.com`**. That host is also
+The platform is served at **`https://proj.simpauldesign.com`**. That host is also
 the contact URL the harvester sends to portals in its `User-Agent`, so portal
 operators reading their logs can identify who is calling — change
 `USER_AGENT` in `src/server/sources/http.ts` if you run this plugin elsewhere.
@@ -104,15 +104,14 @@ Relevant NocoBase settings for that deployment:
 Put nginx in front to terminate TLS and serve static files; NocoBase ships a
 [reference config](https://github.com/nocobase/nocobase/blob/main/docker/nocobase/nocobase.conf).
 
-Two prerequisites are worth checking before the first deploy, because both fail late
-and confusingly:
+`proj.simpauldesign.com` already resolves, to the same address as
+`crm.simpauldesign.com`, and a wildcard certificate for `*.simpauldesign.com` covers it
+— a wildcard matches one label, which this host has. Nothing extra is needed for DNS or
+TLS.
 
-- **DNS.** At the time of writing `www.proj.simpauldesign.com` has no A record, while
-  `proj.simpauldesign.com` resolves. Add the `www` record, or drop the `www` and use
-  the shorter host consistently.
-- **TLS.** A wildcard certificate for `*.simpauldesign.com` does **not** cover
-  `www.proj.simpauldesign.com` — a wildcard matches one label only. That host needs
-  either `*.proj.simpauldesign.com` or its own explicit entry on the certificate.
+Note the corollary if a `www.` form is ever added: `www.proj.simpauldesign.com` is four
+labels, so the same wildcard would **not** cover it. Serve that as a redirect from the
+edge rather than as a second origin, or it needs its own certificate entry.
 
 ## Harvesting
 
